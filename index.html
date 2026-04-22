@@ -155,7 +155,7 @@
         <i class="bi bi-box-arrow-right me-1"></i> ออกจากระบบ
       </a>
     </div>
-</aside>
+  </aside>
 
   <div class="slip-main">
     <nav class="navbar navbar-expand-lg slip-navbar d-flex justify-content-between align-items-center">
@@ -185,6 +185,21 @@
         
         <div class="col-lg-5">
             
+            <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+                <div class="text-warning fw-medium" style="font-size: 0.85rem;"><i class="bi bi-lightning-charge-fill"></i> เมนูด่วน</div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-outline-danger py-1 px-2" style="font-size: 0.75rem;" onclick="clearForm()" title="ล้างค่าทั้งหมด">
+                        <i class="bi bi-trash"></i> ล้าง
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary py-1 px-2" style="font-size: 0.75rem;" onclick="saveFavorite()" title="บันทึกรายการปัจจุบัน">
+                        <i class="bi bi-bookmark-plus"></i> บันทึกไว้
+                    </button>
+                    <button class="btn btn-sm btn-warning py-1 px-2 fw-bold text-dark" style="font-size: 0.75rem;" onclick="loadFavorite()" title="โหลดรายการที่บันทึกไว้">
+                        <i class="bi bi-star-fill"></i> ใช้รายการโปรด
+                    </button>
+                </div>
+            </div>
+
             <div class="form-section-card">
                 <div class="form-section-title"><i class="bi bi-phone"></i> ตั้งค่าโทรศัพท์ & เวลา</div>
                 <div class="row g-2 align-items-end">
@@ -361,6 +376,100 @@
             btn.classList.add('btn-outline-warning');
         }
         if (typeof window.updateDisplay === 'function') window.updateDisplay();
+    };
+
+    // --------------------------------------------------------
+    // ฟังก์ชัน: การจัดการ เมนูด่วน (Clear / Save / Load)
+    // --------------------------------------------------------
+    const STORAGE_KEY = 'slipFav_KTB_IN_1';
+
+    window.clearForm = function() {
+        const now = new Date();
+        const timeStr = now.toTimeString().slice(0,5);
+        if(document.getElementById('datetime_plus_one')) document.getElementById('datetime_plus_one').value = timeStr;
+        
+        if(document.getElementById('monthandyear')) document.getElementById('monthandyear').value = 'สิงหาคม 67';
+        
+        if(document.getElementById('battery')) {
+            document.getElementById('battery').value = 100;
+            updateBatteryUI();
+        }
+        if(typeof isPowerSaving !== 'undefined' && isPowerSaving) {
+            togglePowerSavingMode();
+        }
+        
+        if(document.getElementById('sendername')) document.getElementById('sendername').value = 'น.ส. ยูรีนา อาดตันตรา';
+        if(document.getElementById('senderaccount')) document.getElementById('senderaccount').value = 'XXX-X-XX875-3';
+        if(document.getElementById('money01')) document.getElementById('money01').value = '39,400.90';
+        
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        const localISO = now.toISOString().split('T')[0];
+        if(document.getElementById('datetime')) document.getElementById('datetime').value = localISO;
+        
+        if(document.getElementById('choose1')) document.getElementById('choose1').selectedIndex = 0;
+        if(document.getElementById('money1')) document.getElementById('money1').value = '34,300.75';
+        if(document.getElementById('time1')) document.getElementById('time1').value = '20:00';
+        
+        if(document.getElementById('choose2')) document.getElementById('choose2').selectedIndex = 0;
+        if(document.getElementById('money2')) document.getElementById('money2').value = '11,000.00';
+        if(document.getElementById('time2')) document.getElementById('time2').value = '18:00';
+        
+        if(document.getElementById('choose3')) document.getElementById('choose3').selectedIndex = 0;
+        if(document.getElementById('money3')) document.getElementById('money3').value = '13,500.00';
+        if(document.getElementById('time3')) document.getElementById('time3').value = '16:00';
+        
+        if(window.updateDisplay) window.updateDisplay();
+    };
+
+    window.saveFavorite = function() {
+        const favData = {
+            mYear: document.getElementById('monthandyear') ? document.getElementById('monthandyear').value : '',
+            sName: document.getElementById('sendername') ? document.getElementById('sendername').value : '',
+            sAcc: document.getElementById('senderaccount') ? document.getElementById('senderaccount').value : '',
+            totalMoney: document.getElementById('money01') ? document.getElementById('money01').value : '',
+            
+            c1: document.getElementById('choose1') ? document.getElementById('choose1').value : '',
+            m1: document.getElementById('money1') ? document.getElementById('money1').value : '',
+            t1: document.getElementById('time1') ? document.getElementById('time1').value : '',
+            
+            c2: document.getElementById('choose2') ? document.getElementById('choose2').value : '',
+            m2: document.getElementById('money2') ? document.getElementById('money2').value : '',
+            t2: document.getElementById('time2') ? document.getElementById('time2').value : '',
+            
+            c3: document.getElementById('choose3') ? document.getElementById('choose3').value : '',
+            m3: document.getElementById('money3') ? document.getElementById('money3').value : '',
+            t3: document.getElementById('time3') ? document.getElementById('time3').value : ''
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(favData));
+        alert('⭐ บันทึกรายการนี้เป็น "รายการโปรด" เรียบร้อยแล้ว!');
+    };
+
+    window.loadFavorite = function() {
+        const savedStr = localStorage.getItem(STORAGE_KEY);
+        if (savedStr) {
+            const favData = JSON.parse(savedStr);
+            
+            if(favData.mYear !== undefined && document.getElementById('monthandyear')) document.getElementById('monthandyear').value = favData.mYear;
+            if(favData.sName !== undefined && document.getElementById('sendername')) document.getElementById('sendername').value = favData.sName;
+            if(favData.sAcc !== undefined && document.getElementById('senderaccount')) document.getElementById('senderaccount').value = favData.sAcc;
+            if(favData.totalMoney !== undefined && document.getElementById('money01')) document.getElementById('money01').value = favData.totalMoney;
+            
+            if(favData.c1 !== undefined && document.getElementById('choose1')) document.getElementById('choose1').value = favData.c1;
+            if(favData.m1 !== undefined && document.getElementById('money1')) document.getElementById('money1').value = favData.m1;
+            if(favData.t1 !== undefined && document.getElementById('time1')) document.getElementById('time1').value = favData.t1;
+            
+            if(favData.c2 !== undefined && document.getElementById('choose2')) document.getElementById('choose2').value = favData.c2;
+            if(favData.m2 !== undefined && document.getElementById('money2')) document.getElementById('money2').value = favData.m2;
+            if(favData.t2 !== undefined && document.getElementById('time2')) document.getElementById('time2').value = favData.t2;
+            
+            if(favData.c3 !== undefined && document.getElementById('choose3')) document.getElementById('choose3').value = favData.c3;
+            if(favData.m3 !== undefined && document.getElementById('money3')) document.getElementById('money3').value = favData.m3;
+            if(favData.t3 !== undefined && document.getElementById('time3')) document.getElementById('time3').value = favData.t3;
+            
+            if(window.updateDisplay) window.updateDisplay();
+        } else {
+            alert('⚠️ คุณยังไม่ได้บันทึกรายการโปรด');
+        }
     };
 </script>
 
